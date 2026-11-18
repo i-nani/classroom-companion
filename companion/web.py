@@ -107,7 +107,10 @@ class Web:
         if method not in ("GET","POST"):
             return reply("405 Method Not Allowed")
         at=self.clock()
-        args=parse_qs(env.get("QUERY_STRING",""),max_num_fields=20) if len(env.get("QUERY_STRING",""))<2048 else {}
+        try:
+            args=parse_qs(env.get("QUERY_STRING",""),max_num_fields=20) if len(env.get("QUERY_STRING",""))<2048 else {}
+        except ValueError:
+            return reply("400 Bad Request")
         q=lambda name: args.get(name,[""])[0]
         cookie=SimpleCookie()
         try:

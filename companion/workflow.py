@@ -51,6 +51,21 @@ def teacher(db,user,cls,cmd,args,raw,model,at):
     facts = dict(timezone=cls["tz"],local_now=datetime.fromtimestamp(at,ZoneInfo(cls["tz"])).isoformat())
     if cmd=="/roster":
         return "\n".join(f"{p['id']} · {p['name']} · {'linked' if p['tg'] else 'awaiting link'}" for p in roster(db,cid)) or "Empty roster."
+    if cmd in ("/teacher","/share"):
+        if not user["coordinator"]:
+            raise ValueError("A school coordinator must authorize teacher membership.")
+        if cmd=="/teacher":
+            if not args or len(args)>80:
+                raise ValueError("Use /teacher FULL NAME.")
+            tid,_ = person(db,user["school"],args,staff=True)
+        else:
+            tid=number(args)
+            if not db.execute("SELECT 1 FROM people WHERE school=? AND id=? AND staff=1",(user["school"],tid)).fetchone():
+                raise ValueError("Choose a teacher in this school.")
+            if membership(db,tid,cid):
+                return "This person already belongs to the class."
+        db.execute("INSERT INTO members VALUES(?,?,1)",(cid,tid))
+        return f"Teacher {tid} added. Private invite if unlinked: /link "+invite(db,tid,cid,at)
     if cmd=="/student":
         if not args or len(args)>80:
             raise ValueError("Use /student FULL NAME.")
@@ -216,7 +231,10 @@ def route(db,chat,raw,model,at):
         return "Select an authorized class with /classes and /class ID."
     handler = teacher if cls["teaching"] else student
     if cmd in ("/help","/start"):
-        return (STAFF_HELP if cls["teaching"] else STUDENT_HELP)+"\n/web · private web sign-in key"
+        help_text=STAFF_HELP if cls["teaching"] else STUDENT_HELP
+        if usr["coordinator"]:
+            help_text+="\n/teacher NAME · /share EXISTING_TEACHER_ID"
+        return help_text+"\n/web · private web sign-in key"
     return handler(db,usr,cls,cmd,args,raw,model,at)
 
 def ingest(db,update,model,at):

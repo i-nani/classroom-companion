@@ -14,7 +14,7 @@ RULES = {
     "deadline": 'Extract due_local (YYYY-MM-DDTHH:MM, local time) or clarify. Evening defaults to 18:00. Next weekday means the next strictly future occurrence.',
     "progress": 'Classify a progress message. Return status (acknowledged, in-progress, blocked), and note (a brief factual summary), or clarify if uncertain. A request for assistance is blocked. Submission is a separate explicit action.',
     "summary": 'Return {"text":"..."} with a concise teacher briefing. Prioritize blocked, overdue and silent learners; cite only the supplied facts. Avoid inventing feedback, causes or actions.',
-    "reminder": 'Return {"text":"..."} with one short supportive check-in to this student about the given assignment. Ask about progress if silent; offer help if blocked. Use only supplied facts. No links.',
+    "reminder": 'Return {"text":"..."} with one short supportive check-in. For a blocked learner address the teacher and suggest helping; otherwise address the learner and ask about progress. Use only supplied facts. No links.',
 }
 def field(data, name, limit=1500):
     val = data.get(name)

@@ -70,6 +70,9 @@ def transaction(db):
         raise
 
 def now():
+    clock = os.getenv("DEMO_CLOCK_FILE")
+    if clock and Path(clock).is_file():
+        return int(Path(clock).read_text().strip())
     return int(time.time())
 
 def local(ts, zone):
