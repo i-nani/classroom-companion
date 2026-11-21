@@ -40,6 +40,10 @@ def check():
             code = json.loads(exc.read()).get("error", {}).get("code")
         except (AttributeError, ValueError):
             code = None
+        if code == "credit_balance_exhausted":
+            return "CREDITS - the provider reports that the API credit balance is exhausted."
+        if code in ("project_spend_limit_exceeded", "organization_spend_limit_exceeded", "organization_usage_limit_exceeded"):
+            return f"LIMIT - {code}. Check the corresponding API project or organization limit."
         if code == "insufficient_quota":
             return "QUOTA - check available API credits and project limits."
         if exc.code == 401:
@@ -47,7 +51,12 @@ def check():
         if exc.code in (403, 404):
             return f"HTTP {exc.code} - check model access, MODEL_NAME and MODEL_BASE_URL."
         if exc.code == 429:
-            return "HTTP 429 - check provider limits and retry after a short wait."
+            delay = exc.headers.get("Retry-After", "").strip()
+            if code in ("rate_limit_exceeded", "slow_down") or delay.isdecimal():
+                if delay.isdecimal():
+                    return f"RATE - wait at least {delay} seconds before retrying."
+                return "RATE - the request was rate limited. Wait before retrying."
+            return "HTTP 429 - cause unspecified. Check the API credit balance and limits for this project."
         return f"HTTP {exc.code} - the provider rejected or could not complete the request."
     except (OSError, TimeoutError):
         return "CONNECTION - the model endpoint could not be reached within the request timeout."
