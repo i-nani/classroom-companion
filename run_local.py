@@ -65,7 +65,12 @@ def start(mode, browser=True):
             if mode == "live":
                 worker = subprocess.Popen([sys.executable, "-m", "companion", "worker", "--db", str(path)])
             if browser:
-                webbrowser.open(url)
+                try:
+                    opened = webbrowser.open(url)
+                except (OSError, webbrowser.Error):
+                    opened = False
+                if not opened:
+                    print(f"Open this address in your browser: {url}", flush=True)
             server.timeout = 1
             while worker is None or worker.poll() is None:
                 server.handle_request()
