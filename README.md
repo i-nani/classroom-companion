@@ -2,6 +2,12 @@
 
 A Telegram-first classroom pilot. A teacher publishes work once, each learner has an independent progress record, and teachers review submissions and blockers in a small web workspace. The project uses Python, SQLite, Telegram long polling and an OpenAI-compatible language-model endpoint. The two web views share a URL and are selected by the signed-in user's class membership.
 
+## Start on a Windows laptop
+
+With Python 3.10 or newer installed, extract the project and double-click **Start-Classroom.cmd**. Press Enter for an offline rehearsal. The launcher installs the Windows timezone dependency in a local virtual environment, runs the classroom scenario, prints one web key per role and opens the dashboard. Sign in as Mira, Asha or Ravi. Each offline launch creates a fresh practice database under `.state/` and prints its path. Keep the window open while using the dashboard.
+
+For Telegram, type **live** at the same prompt. The launcher reads the project's `.env` or asks for the two missing credentials privately for this session. It checks the bot identity, prepares the live database, and starts both the polling worker and the web UI. Copy the private invite commands and web keys on the first live run. On subsequent launches it resumes the same database. Use the live runbook below for the three participants. If you enable the rehearsal clock, set it before starting the launcher. On other operating systems, use `python run_local.py offline` or `python run_local.py live` from your configured Python environment.
+
 ## Run the offline demonstration first
 
 Use Python 3.10 or newer. From the directory containing this README, run:
